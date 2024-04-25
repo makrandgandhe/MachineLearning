@@ -2,6 +2,7 @@
 #include<string.h>
 #include<stdlib.h>
 #include<matrix.h>
+#include<dataset.h>
 
 #define DEBUG 1
 #define NORMAL 0
@@ -10,38 +11,23 @@
 
 void write_error_value_in_log_file(FILE* file,unsigned int iter, double error_value);
 void write_final_parameters_in_output_file(FILE* file,vec_double* vector);
+
 int main(int count, char** args)
 {
-    mat_double* dataset;
-    mat_double* I;
-    mat_double* IT;
-    vec_double* A;
-    vec_double* M;
-    vec_double* P;
-    vec_double* E;
-    vec_double* ET;
-    mat_double* EE;
-    vec_double* IT_E;
-    vec_double* UM;
-    vec_double* LR_N__IT_E;
-
-    double learning_rate;
-    double error_value, prev_error_value;
-    double LR_N;
-    long unsigned int i = 0;
-    long unsigned int number_of_iterations;
-
     const char* dataset_file_name;
     FILE* log_file;
     FILE* output_file;
+
+    double learning_rate;
+    long unsigned int number_of_iterations;
+
+    dataset* data_set;
 
     if(count < 6)
     {
         printf("Usage: train <dataset_file> <learning_rate> <number_of_iterations> <log_file> <output_file>\n");
         return 0;
     }
-
-    // ================================
     dataset_file_name = args[1];
     learning_rate = strtod(args[2],NULL);
     number_of_iterations = atoi(args[3]);
@@ -58,43 +44,63 @@ int main(int count, char** args)
         fclose(log_file);
         return 0;
     }
-    // ================================
-
-    dimension_t dataset_row_count, dataset_column_count;
-    // load 
-    dataset = mat_double_from_csv(dataset_file_name);
-    if(!dataset) 
+    data_set = mat_double_from_csv(dataset_file_name);
+    if(!data_set) 
     {
         printf("Unable to load %s\n",dataset_file_name);
         return 0;
     }
-    if(PRINT_MODE == DEBUG) mat_double_print(dataset,"Data Set");
-    mat_double_get_dimensions(dataset,&dataset_row_count, &dataset_column_count);
+}
+
+
+int train(dataset* data_set, double learning_rate, long unsigned int number_of_iterations, FILE* log_file, FILE* output_file)
+{
+    mat_double* I;
+    mat_double* IT;
+    vec_double* A;
+    vec_double* M;
+    vec_double* P;
+    vec_double* E;
+    vec_double* ET;
+    mat_double* EE;
+    vec_double* IT_E;
+    vec_double* UM;
+    vec_double* LR_N__IT_E;
+
+    double error_value, prev_error_value;
+    double LR_N;
+    long unsigned int i = 0;
+
+    dimension_t dataset_row_count, dataset_column_count;
+    // load 
+    
+    if(PRINT_MODE == DEBUG) mat_double_print(data_set,"Data Set");
+    mat_double_get_dimensions(data_set,&dataset_row_count, &dataset_column_count);
     if(PRINT_MODE == NORMAL) printf("Dataset - rows = %d, column = %d\n",dataset_row_count, dataset_column_count);
     LR_N = learning_rate / dataset_row_count;
     if(PRINT_MODE == DEBUG) printf("LR_N = %20.10lf\n", LR_N);
-    A = mat_double_column_to_vector(dataset,dataset_column_count - 1);
+    A = mat_double_column_to_vector(data_set,dataset_column_count - 1);
     if(!A)
     {
-        mat_double_destroy(dataset);
+        mat_double_destroy(data_set);
         printf("Unable to perform Column to Vector\n");
         return 0;
     }
     I = mat_double_create_new_filled(dataset_row_count, dataset_column_count, 1);
     if(!I)
     {
-        mat_double_destroy(dataset);
+        mat_double_destroy(data_set);
         vec_double_destroy(A);
         printf("Unable to create I Matrix\n");
         return 0;
     }
-    mat_double_box_copy(dataset, 0, 0,dataset_row_count, dataset_column_count - 1, I, 0, 1);
+    mat_double_box_copy(data_set, 0, 0,dataset_row_count, dataset_column_count - 1, I, 0, 1);
     if(PRINT_MODE == DEBUG) mat_double_print(I, "I matrix");
     if(PRINT_MODE == DEBUG) vec_double_print(A,"A Vector");
     M = vec_double_create_new_column_filled(dataset_column_count, 0.0);
     if(!M)
     {
-        mat_double_destroy(dataset);
+        mat_double_destroy(data_set);
         vec_double_destroy(A);
         mat_double_destroy(I);
         printf("Unable to create I Matrix\n");
@@ -106,7 +112,7 @@ int main(int count, char** args)
     if(PRINT_MODE == DEBUG) mat_double_print(IT,"IT");
     if(!IT)
     {
-        mat_double_destroy(dataset);
+        mat_double_destroy(data_set);
         vec_double_destroy(A);
         mat_double_destroy(I);
         vec_double_destroy(M);
@@ -120,7 +126,7 @@ int main(int count, char** args)
         if(PRINT_MODE == DEBUG) vec_double_print(P,"P");
         if(!P)
         {
-            mat_double_destroy(dataset);
+            mat_double_destroy(data_set);
             vec_double_destroy(A);
             mat_double_destroy(I);
             mat_double_destroy(IT);
@@ -132,7 +138,7 @@ int main(int count, char** args)
         if(PRINT_MODE == DEBUG) vec_double_print(E,"E");
         if(!E)
         {
-            mat_double_destroy(dataset);
+            mat_double_destroy(data_set);
             vec_double_destroy(A);
             mat_double_destroy(I);
             mat_double_destroy(IT);
@@ -145,7 +151,7 @@ int main(int count, char** args)
         if(PRINT_MODE == DEBUG) vec_double_print(ET,"ET");
         if(!ET)
         {
-            mat_double_destroy(dataset);
+            mat_double_destroy(data_set);
             vec_double_destroy(A);
             mat_double_destroy(I);
             mat_double_destroy(IT);
@@ -159,7 +165,7 @@ int main(int count, char** args)
         if(PRINT_MODE == DEBUG) mat_double_print(EE,"EE");
         if(!EE)
         {
-            mat_double_destroy(dataset);
+            mat_double_destroy(data_set);
             vec_double_destroy(A);
             mat_double_destroy(I);
             mat_double_destroy(IT);
@@ -176,7 +182,7 @@ int main(int count, char** args)
         write_error_value_in_log_file(log_file, i, error_value);
         if(i > 1 && (error_value > prev_error_value || i==number_of_iterations))
         {
-            mat_double_destroy(dataset);
+            mat_double_destroy(data_set);
             vec_double_destroy(A);
             mat_double_destroy(I);
             mat_double_destroy(IT);
@@ -193,7 +199,7 @@ int main(int count, char** args)
         if(PRINT_MODE == DEBUG) vec_double_print(IT_E,"IT_E");
         if(!IT_E)
         {
-            mat_double_destroy(dataset);
+            mat_double_destroy(data_set);
             vec_double_destroy(A);
             mat_double_destroy(I);
             mat_double_destroy(IT);
@@ -209,7 +215,7 @@ int main(int count, char** args)
         if(PRINT_MODE == DEBUG) vec_double_print(LR_N__IT_E,"LR_N__IT_E");
         if(!LR_N__IT_E)
         {
-            mat_double_destroy(dataset);
+            mat_double_destroy(data_set);
             vec_double_destroy(A);
             mat_double_destroy(I);
             mat_double_destroy(IT);
@@ -226,7 +232,7 @@ int main(int count, char** args)
         UM = vec_double_vector_substraction(M, LR_N__IT_E);
         if(!UM)
         {
-            mat_double_destroy(dataset);
+            mat_double_destroy(data_set);
             vec_double_destroy(A);
             mat_double_destroy(I);
             mat_double_destroy(IT);
