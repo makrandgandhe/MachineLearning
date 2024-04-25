@@ -469,17 +469,6 @@ mat_double* vec_double_vector_multiplication(vec_double* left_vector, vec_double
     double value;
     if(!left_vector || !right_vector) return NULL;
     if(left_vector->vector_type == right_vector->vector_type) return NULL;
-    if(left_vector->length != right_vector->length )
-    {
-        if((left_vector->vector_type == 'c' && right_vector->length == 1) || (right_vector->vector_type == 'r' && left_vector->length == 1))
-        {
-            // ok case
-        }
-        else 
-        {
-            return NULL;
-        }
-    }
     left_vector_nr = left_vector->vector_type == 'c' ? left_vector->length : 1;
     left_vector_nc = left_vector->vector_type == 'r' ? left_vector->length : 1;
     // right_vector_nr = right_vector->vector_type == 'c' ? right_vector->length : 1;
@@ -519,7 +508,7 @@ vec_double* vec_double_matrix_vector_multiplication(mat_double* matrix, vec_doub
         value = 0;
         for(c=0;c<matrix->number_of_columns;++c)
         {
-            value += matrix->data[r][c] * vector->data[r];
+            value += matrix->data[r][c] * vector->data[c];
         }
         result_vector->data[r] = value;
     }
@@ -687,7 +676,7 @@ void mat_double_test()
     dimension_t l;
     index_t r,c;
     char vt;
-    mat_double *matrix1, *matrix2, *matrix3, *matrix4, *matrix5, *matrix6, *matrix7, *matrix8;
+    mat_double *matrix1, *matrix2, *matrix3, *matrix4, *matrix5, *matrix6, *matrix7, *matrix8, *matrix9;
     double val;
     nr = 2;
     nc = 3;
@@ -731,7 +720,7 @@ void mat_double_test()
 
     // vector tests
 
-    vec_double *vector1, *vector2, *vector3, *vector4, *vector5, *vector6, *vector7, *vector8, *vector9;
+    vec_double *vector1, *vector2, *vector3, *vector4, *vector5, *vector6, *vector7, *vector8, *vector9, *vector10, *vector11, *vector12;
 
     printf("\n\ntesting  vec_double_create_new_row\n");
     vector1 = vec_double_create_new_row_filled(3,2);
@@ -755,11 +744,43 @@ void mat_double_test()
     vector3 = vec_double_transpose(vector1);
     vec_double_print(vector3, "Vector3 = Transpose of Vector1");
     printf("\n\ntesting  vec_double_vector_multiplication\n");
-    matrix8 =  vec_double_vector_multiplication(vector1, vector2);
-    mat_double_print(matrix8, "Matrix8 = Vector1 * Vector2");
+    vector12 = vec_double_create_new_row(4);
+    for(int uu = 1;uu<=3;++uu)
+    {
+        vector2->data[uu-1] = uu;
+        vector12->data[uu-1] = uu + 4;
+    }
+    vector12->data[3] = 8;
+    vec_double_print(vector2, "Vector2");
+    vec_double_print(vector12, "Vector12");
+    matrix8 =  vec_double_vector_multiplication(vector2, vector12);
+    mat_double_print(matrix8, "Matrix8 = Vector2 * Vector12");
     printf("\n\ntesting  vec_double_matrix_vector_multiplication\n");
     vector4 = vec_double_matrix_vector_multiplication(matrix1, vector2);
+    mat_double_print(matrix1, "Matrix1");
+    vec_double_print(vector2, "Vector2");
     vec_double_print(vector4, "Vector4 = Metrix1 * Vector2");
+
+    matrix9 = mat_double_create_new(5,2);
+    for(int pp = 0,jj = 1;pp<5;++pp)
+    {
+        for(int ff = 0;ff<2;++ff,++jj)
+        {
+            matrix9->data[pp][ff] =  jj*11;
+        }
+    }
+
+    vector10 = vec_double_create_new_column(2);
+    vector10->data[0] = 6;
+    vector10->data[1] = 9;
+
+    mat_double_print(matrix9,"Matrix9");
+    vec_double_print(vector10,"Vector10");
+    vector11 = vec_double_matrix_vector_multiplication(matrix9, vector10);
+
+    vec_double_print(vector11,"Vector11 = Matrix9 * Vector10");
+
+
     printf("\n\ntesting  vec_double_scalar_multiplication\n");
     vector5 = vec_double_scalar_multiplication(3, vector4);
     vec_double_print(vector5, "Vector5 = 3 * Vector4");
