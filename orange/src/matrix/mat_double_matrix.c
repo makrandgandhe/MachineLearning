@@ -3,6 +3,7 @@
 #include<stdlib.h>
 #include<string.h>
 #include<inttypes.h>
+#include<time.h>
 
 typedef struct __mat_double
 {
@@ -669,6 +670,37 @@ int mat_double_box_copy(mat_double* source_matrix, index_t source_row_start, ind
     return 0;
 }
 
+void mat_double_swap_rows(mat_double* matrix, index_t index1, index_t index2)
+{
+    if(!matrix || index1 >= matrix->number_of_rows || index2 >= matrix->number_of_rows ) return;
+    double* tmp_row;
+    tmp_row = matrix->data[index1];
+    matrix->data[index1] = matrix->data[index2];
+    matrix->data[index2] = tmp_row;
+}
+
+mat_double* mat_double_get_copy(mat_double* matrix)
+{
+    mat_double* new_matrix;
+    dimension_t nr, nc;
+    if(!matrix) return NULL;
+    nr = matrix->number_of_rows;
+    nc = matrix->number_of_columns;
+    new_matrix = mat_double_create_new(nr, nc);
+    if(!new_matrix) return NULL;
+    copy_matrix((void**)new_matrix->data, (void**) matrix->data, sizeof(double), nr, nc);
+    return new_matrix;
+}
+
+// this function will be moved to some other location
+int random_number_in_range(int start, int end)
+{
+    int random_number;
+    srand(time(0));
+    random_number = rand();
+    random_number = ( random_number % (start - end + 1) ) + start;
+    return random_number;
+}
 
 void mat_double_test()
 {

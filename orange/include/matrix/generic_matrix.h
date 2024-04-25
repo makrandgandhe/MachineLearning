@@ -6,6 +6,9 @@
 
 void** create_new_matrix(size_t element_size, dimension_t number_of_rows, dimension_t number_of_columns);
 void destroy_matrix(void** matrix, dimension_t number_of_rows);
+
+int copy_matrix(void** dest, void** src, size_t element_size, dimension_t number_of_rows, dimension_t number_of_columns);
+
 void* create_new_vector(size_t element_size, dimension_t length);
 void destroy_vector(void* vector);
 

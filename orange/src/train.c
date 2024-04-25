@@ -1,15 +1,16 @@
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
 #include<matrix.h>
 
 #define DEBUG 1
 #define NORMAL 0
-#define PRINT_MODE DEBUG
+#define NONE -1
+#define PRINT_MODE NORMAL
 
-#define ITERATIONS 1000
-
-double learning_rate = 0.001;
-const char* dataSetFileName = "../resources/Ice.csv";
-
-int main()
+void write_error_value_in_log_file(FILE* file,unsigned int iter, double error_value);
+void write_final_parameters_in_output_file(FILE* file,vec_double* vector);
+int main(int count, char** args)
 {
     mat_double* dataset;
     mat_double* I;
@@ -23,26 +24,55 @@ int main()
     vec_double* IT_E;
     vec_double* UM;
     vec_double* LR_N__IT_E;
-    
 
+    double learning_rate;
     double error_value, prev_error_value;
     double LR_N;
-
     long unsigned int i = 0;
+    long unsigned int number_of_iterations;
+
+    const char* dataset_file_name;
+    FILE* log_file;
+    FILE* output_file;
+
+    if(count < 6)
+    {
+        printf("Usage: train <dataset_file> <learning_rate> <number_of_iterations> <log_file> <output_file>\n");
+        return 0;
+    }
+
+    // ================================
+    dataset_file_name = args[1];
+    learning_rate = strtod(args[2],NULL);
+    number_of_iterations = atoi(args[3]);
+    log_file = fopen(args[4],"w");
+    if(!log_file)
+    {
+        printf("Unable to create/open log_file: %s\n",args[4]);
+        return 0;
+    }
+    output_file = fopen(args[5],"w");
+    if(!log_file)
+    {
+        printf("Unable to create/open output_file: %s\n",args[5]);
+        fclose(log_file);
+        return 0;
+    }
+    // ================================
 
     dimension_t dataset_row_count, dataset_column_count;
     // load 
-    dataset = mat_double_from_csv(dataSetFileName);
+    dataset = mat_double_from_csv(dataset_file_name);
     if(!dataset) 
     {
-        printf("Unable to load %s\n",dataSetFileName);
+        printf("Unable to load %s\n",dataset_file_name);
         return 0;
     }
     if(PRINT_MODE == DEBUG) mat_double_print(dataset,"Data Set");
     mat_double_get_dimensions(dataset,&dataset_row_count, &dataset_column_count);
-    printf("Dataset - rows = %d, column = %d\n",dataset_row_count, dataset_column_count);
+    if(PRINT_MODE == NORMAL) printf("Dataset - rows = %d, column = %d\n",dataset_row_count, dataset_column_count);
     LR_N = learning_rate / dataset_row_count;
-    printf("LR_N = %20.10lf\n", LR_N);
+    if(PRINT_MODE == DEBUG) printf("LR_N = %20.10lf\n", LR_N);
     A = mat_double_column_to_vector(dataset,dataset_column_count - 1);
     if(!A)
     {
@@ -142,20 +172,18 @@ int main()
         }
         error_value = mat_double_get(EE,0,0);
         error_value = error_value / (2 * dataset_row_count);
-        printf("%ld %lf\n",i,error_value);
-        if(i > 0 && error_value > prev_error_value)
+        if(PRINT_MODE == NORMAL) printf("%ld %lf\n",i,error_value);
+        write_error_value_in_log_file(log_file, i, error_value);
+        if(i > 1 && (error_value > prev_error_value || i==number_of_iterations))
         {
             mat_double_destroy(dataset);
             vec_double_destroy(A);
             mat_double_destroy(I);
             mat_double_destroy(IT);
-            // vec_double_destroy(M);
             vec_double_destroy(P);
             vec_double_destroy(E);
             vec_double_destroy(ET);
             mat_double_destroy(EE);
-            printf("BREAKING LOOP\n\n");
-            printf("error_value = %20.10lf , prev_error_value = %20.10lf\n",error_value, prev_error_value);
             break;
         }
         prev_error_value = error_value;
@@ -178,7 +206,7 @@ int main()
             return 0;
         }
         LR_N__IT_E = vec_double_scalar_multiplication(LR_N, IT_E);
-        vec_double_print(LR_N__IT_E,"LR_N__IT_E");
+        if(PRINT_MODE == DEBUG) vec_double_print(LR_N__IT_E,"LR_N__IT_E");
         if(!LR_N__IT_E)
         {
             mat_double_destroy(dataset);
@@ -194,6 +222,7 @@ int main()
             printf("Unable to perform vec_double_scalar_multiplication(LR_N, IT_E)\n");
             return 0;
         }
+        if(PRINT_MODE == DEBUG) vec_double_print(M,"M");
         UM = vec_double_vector_substraction(M, LR_N__IT_E);
         if(!UM)
         {
@@ -212,6 +241,7 @@ int main()
             return 0;
         }
         vec_double_destroy(M);
+        if(PRINT_MODE == DEBUG) vec_double_print(UM,"UM");
         M = UM;
 
         vec_double_destroy(P);
@@ -222,6 +252,31 @@ int main()
         vec_double_destroy(LR_N__IT_E);
         ++i;
     }
-
+    write_final_parameters_in_output_file(output_file, UM);
+    if(PRINT_MODE == NORMAL) vec_double_print(UM,"final M");
+    // vec_double_destroy(UM);
     return 0;
+}
+
+
+void write_error_value_in_log_file(FILE* file,unsigned int iter, double error_value)
+{
+    if(!file) return;
+    char str[50];
+    sprintf(str, "%d %20.15lf\n",iter, error_value);
+    fputs(str, file);
+}
+
+void write_final_parameters_in_output_file(FILE* file,vec_double* vector)
+{
+    if(!file) return;
+    char str[10000]; // expecting lots of features
+    int n;
+    dimension_t len;
+    vec_double_get_length(vector,&len);
+    for(index_t i = 0, n=0;i<len;++i)
+    {
+        n = sprintf(&str[n], "%-20.15lf\n", vec_double_get(vector,i));
+    }
+    fputs(str, file);
 }

@@ -35,10 +35,20 @@ void destroy_matrix(void** matrix, dimension_t number_of_rows)
     free(matrix);
 }
 
+int copy_matrix(void** dest, void** src, size_t element_size, dimension_t number_of_rows, dimension_t number_of_columns)
+{
+    index_t r;
+    if(!dest || !src) return -1;
+    for(r=0;r<number_of_rows;++r)
+    {
+        memcpy(dest[r],src[r],element_size*number_of_columns);
+    }
+    return 0;
+}
+
 void* create_new_vector(size_t element_size, dimension_t length)
 {
     void* vector;
-    dimension_t l;
     if(length == 0) return NULL;
     vector = (void*) malloc(element_size * length);
     if(!vector) return NULL;
@@ -54,4 +64,5 @@ int copy_vector(void* dest, void* src, size_t element_size, dimension_t length)
 {
     if(!dest || !src) return -1;
     memcpy(dest,src,element_size*length);
+    return 0;
 }
