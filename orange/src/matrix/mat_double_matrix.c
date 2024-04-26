@@ -692,6 +692,21 @@ mat_double* mat_double_get_copy(mat_double* matrix)
     return new_matrix;
 }
 
+int mat_double_copy_vector_to_column(mat_double* matrix, vec_double* vector, index_t column_index)
+{
+    index_t e;
+    if(!matrix || !vector || column_index >= matrix->number_of_columns || matrix->number_of_rows != vector->length || vector->vector_type != 'c')
+    {
+        return -1;
+    }
+    for(e=0;e<matrix->number_of_rows;++e)
+    {
+        matrix->data[e][column_index] = vector->data[e];
+    }
+    return 0;
+}
+
+
 // this function will be moved to some other location
 int random_number_in_range(int start, int end)
 {
@@ -701,6 +716,8 @@ int random_number_in_range(int start, int end)
     random_number = ( random_number % (start - end + 1) ) + start;
     return random_number;
 }
+
+
 
 void mat_double_test()
 {

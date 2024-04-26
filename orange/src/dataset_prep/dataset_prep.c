@@ -22,7 +22,7 @@ dataset* dataset_shuffle_rows(dataset* data_set, unsigned char iterations)
     return new_matrix;
 }
 
-dataset** mat_split_random(dataset* data_set, uint8_t first_portion_percentage, uint8_t number_of_shuffles)
+dataset** dataset_split_random(dataset* data_set, uint8_t first_portion_percentage, uint8_t number_of_shuffles)
 {
     dimension_t nr, nc, nr1, nr2, nc1, nc2;
     dataset *data_set1, *data_set2;
@@ -32,7 +32,7 @@ dataset** mat_split_random(dataset* data_set, uint8_t first_portion_percentage, 
     shuffled_dataset = dataset_shuffle_rows(data_set, number_of_shuffles);
     if(!shuffled_dataset) return NULL;
     mat_double_get_dimensions(data_set, &nr, &nc);
-    nr1 = nr * (first_portion_percentage / 100);
+    nr1 = (dimension_t)( (double)nr * ((double)first_portion_percentage / 100) );
     nr2 = nr - nr1;
     nc1 = nc2 = nc;
     portions = (dataset**) malloc(sizeof(dataset*) * 2);
@@ -57,6 +57,6 @@ dataset** mat_split_random(dataset* data_set, uint8_t first_portion_percentage, 
     mat_double_box_copy(shuffled_dataset, nr1, 0, nr2, nc, data_set2, 0, 0);
     mat_double_destroy(shuffled_dataset);
     portions[0] = data_set1;
-    portions[2] = data_set2;
+    portions[1] = data_set2;
     return portions;
 }

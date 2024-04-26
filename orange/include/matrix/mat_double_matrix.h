@@ -50,6 +50,7 @@ void vec_double_print(vec_double* vector, const char* title);
 
 vec_double* mat_double_column_to_vector(mat_double* matrix, index_t column_index);
 int mat_double_box_copy(mat_double* source_matrix, index_t source_row_start, index_t source_column_start, dimension_t number_of_rows, dimension_t number_of_columns, mat_double* destination_matrix, index_t destination_row_start, index_t destination_column_start );
+int mat_double_copy_vector_to_column(mat_double* matrix, vec_double* vector, index_t column_index);
 
 void mat_double_swap_rows(mat_double* matrix, index_t index1, index_t index2);
 mat_double* mat_double_get_copy(mat_double* matrix);
