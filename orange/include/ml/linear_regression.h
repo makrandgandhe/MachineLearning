@@ -1,60 +1,13 @@
-#include<stdio.h>
-#include<string.h>
-#include<stdlib.h>
 #include<matrix.h>
 #include<dataset.h>
+#include<orange.h>
 
-#define DEBUG 1
-#define NORMAL 0
-#define NONE -1
-#define PRINT_MODE NONE
-
-void write_error_value_in_log_file(FILE* file,unsigned int iter, double error_value);
-
-int train(dataset* data_set, double learning_rate, long unsigned int number_of_iterations, FILE* log_file, const char* output_file);
-
-int main(int count, char** args)
+int polinomial_regression(dataset* data_set, double learning_rate, long unsigned int number_of_iterations, FILE* log_file, const char* output_file_name)
 {
-    if(count < 6)
-    {
-        printf("Usage: train <dataset_file> <learning_rate> <number_of_iterations> <log_file> <output_file>\n");
-        return 0;
-    }
-    system("date");
-    const char* dataset_file_name;
-    FILE* log_file;
-    const char* output_file_name;
-    double learning_rate;
-    long unsigned int number_of_iterations;
-    dataset* data_set;
-    dataset_file_name = args[1];
-    learning_rate = strtod(args[2],NULL);
-    number_of_iterations = atoi(args[3]);
-    log_file = fopen(args[4],"w");
-    if(!log_file)
-    {
-        printf("Unable to create/open log_file: %s\n",args[4]);
-        return 0;
-    }
-    output_file_name = args[5];
-    if(!log_file)
-    {
-        printf("Unable to create/open output_file: %s\n",args[5]);
-        fclose(log_file);
-        return 0;
-    }
-    data_set = mat_double_from_csv(dataset_file_name);
-    if(!data_set) 
-    {
-        printf("Unable to load %s\n",dataset_file_name);
-        return 0;
-    }
-    train(data_set, learning_rate, number_of_iterations,log_file, output_file_name);
-    system("date");
+    
 }
 
-
-int train(dataset* data_set, double learning_rate, long unsigned int number_of_iterations, FILE* log_file, const char* output_file_name)
+int linear_regression(dataset* data_set, double learning_rate, long unsigned int number_of_iterations, FILE* log_file, const char* output_file_name)
 {
     mat_double* I;
     mat_double* IT;
@@ -272,3 +225,4 @@ void write_error_value_in_log_file(FILE* file,unsigned int iter, double error_va
     sprintf(str, "%d %-20.15lf\n",iter, error_value);
     fputs(str, file);
 }
+

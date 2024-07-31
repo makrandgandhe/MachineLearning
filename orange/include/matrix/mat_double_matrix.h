@@ -15,6 +15,7 @@ double mat_double_get(mat_double* matrix, index_t row_index, index_t column_inde
 void mat_double_get_dimensions(mat_double* matrix, dimension_t* number_of_rows, dimension_t* number_of_columns);
 mat_double* mat_double_transpose(mat_double* matrix);
 mat_double* mat_double_matrix_multiplication(mat_double* left_matrix, mat_double* right_matrix);
+mat_double* mat_double_matrix_multiplication_dac(mat_double* left_matrix, mat_double* right_matrix);
 mat_double* mat_double_scalar_multiplication(double value, mat_double* matrix);
 mat_double* mat_double_matrix_addition(mat_double* left_matrix, mat_double* right_matrix);
 mat_double* mat_double_matrix_substraction(mat_double* left_matrix, mat_double* right_matrix);
@@ -46,7 +47,7 @@ int vec_double_to_csv(vec_double* vector, const char* file_name);
 vec_double* vec_double_from_csv(const char* file_name);
 void vec_double_print(vec_double* vector, const char* title);
 
-// msic functions
+// misc functions
 
 vec_double* mat_double_column_to_vector(mat_double* matrix, index_t column_index);
 int mat_double_box_copy(mat_double* source_matrix, index_t source_row_start, index_t source_column_start, dimension_t number_of_rows, dimension_t number_of_columns, mat_double* destination_matrix, index_t destination_row_start, index_t destination_column_start );

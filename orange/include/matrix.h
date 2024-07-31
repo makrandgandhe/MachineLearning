@@ -10,7 +10,10 @@
 #include<matrix/generic_matrix.h>
 #include<matrix/mat_int8_matrix.h>
 #include<matrix/mat_double_matrix.h>
+#include<matrix/mat_double_math.h>
+#include<matrix/mat_string_matrix.h>
 
-
+#define MAT_FALSE 0
+#define MAT_TRUE 1
 
 #endif
