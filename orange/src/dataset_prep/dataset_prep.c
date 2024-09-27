@@ -60,3 +60,15 @@ dataset** dataset_split_random(dataset* data_set, uint8_t first_portion_percenta
     portions[1] = data_set2;
     return portions;
 }
+
+dataset* dataset_encode(dataset* data_set, ORANGE_DATASET_ENCODING_TYPE encoding_type)
+{
+    dataset* encoded_datset;
+    if(!data_set)
+    {
+        // ToDo
+    }
+    return NULL;
+    
+}
+

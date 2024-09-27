@@ -14,4 +14,5 @@ rm -f *.o
 gcc -I include src/train.c  -Llib -lmatrix -Llib -ldataset  -o train -Wall
 gcc -I include src/prepare_test_train_dataset.c  -Llib -lmatrix -Llib -ldataset  -o prepare_test_train_dataset -Wall
 gcc -I include src/test_accuracy.c -Llib -lmatrix -Llib -ldataset  -o test_accuracy -Wall
-gcc -I include test/matrix/test_mat_double_math.c -Llib -lmatrix -lm -o test_matrix -Wall
+gcc -I include test/matrix/test_mat_double_math.c -Llib -lmatrix -lm -o bin/test/test_mat_double_math -Wall
+gcc -I include test/matrix/test_set_string.c -Llib -lmatrix -lm -o bin/test/test_set_string -Wall

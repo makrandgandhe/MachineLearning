@@ -2,10 +2,7 @@
 #include<dataset.h>
 #include<orange.h>
 
-int polinomial_regression(dataset* data_set, double learning_rate, long unsigned int number_of_iterations, FILE* log_file, const char* output_file_name)
-{
-    
-}
+int polinomial_regression(dataset* data_set, double learning_rate, long unsigned int number_of_iterations, FILE* log_file, const char* output_file_name);
 
 int linear_regression(dataset* data_set, double learning_rate, long unsigned int number_of_iterations, FILE* log_file, const char* output_file_name)
 {
