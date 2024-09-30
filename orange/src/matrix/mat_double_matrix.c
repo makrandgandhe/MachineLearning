@@ -514,6 +514,11 @@ typedef struct __vec_double
     char vector_type;
 } vec_double;
 
+vec_double* vec_double_create_new(dimension_t length)
+{
+    return vec_double_create_new_row(length);
+}
+
 vec_double *vec_double_create_new_row(dimension_t length)
 {
     vec_double *vector;

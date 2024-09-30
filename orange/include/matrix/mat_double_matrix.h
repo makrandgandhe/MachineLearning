@@ -9,6 +9,7 @@ typedef struct __mat_double mat_double; // opaque type
 
 mat_double* mat_double_create_new(dimension_t number_of_rows, dimension_t number_of_columns);
 mat_double* mat_double_create_new_filled(dimension_t number_of_rows, dimension_t number_of_columns, double fill_value);
+mat_double* mat_double_create_new_random_filled(dimension_t number_of_rows, dimension_t number_of_columns, double randome_range_from, double randome_range_to);
 void mat_double_destroy(mat_double* matrix);
 void mat_double_set(mat_double* matrix, index_t row_index, index_t column_index, double value);
 double mat_double_get(mat_double* matrix, index_t row_index, index_t column_index);
@@ -28,6 +29,7 @@ void mat_double_print(mat_double* matrix, const char* title);
 
 typedef struct __vec_double vec_double; // opaque type
 
+vec_double* vec_double_create_new(dimension_t length);
 vec_double* vec_double_create_new_row(dimension_t length);
 vec_double* vec_double_create_new_column(dimension_t length);
 vec_double* vec_double_create_new_row_filled(dimension_t length, double fill_value);
