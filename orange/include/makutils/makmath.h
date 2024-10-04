@@ -3,7 +3,9 @@
 
 #include <inttypes.h>
 
-double mu_random_double(double min_val, double max_val, unsigned int seed);
-int32_t mu_random_int(int32_t min_val, int32_t max_val, unsigned int seed);
+double mu_random_double(double min_val, double max_val);
+int32_t mu_random_int(int32_t min_val, int32_t max_val);
+
+void mu_random_set_seed(void);
 
 #endif

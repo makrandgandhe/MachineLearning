@@ -59,7 +59,7 @@ int linear_regression(dataset* data_set, double learning_rate, long unsigned int
     }
     if(PRINT_MODE == DEBUG) vec_double_print(M,"M Vector");
 
-    IT = mat_double_transpose(I);
+    IT = mat_double_transpose(I,NULL);
     if(PRINT_MODE == DEBUG) mat_double_print(IT,"IT");
     if(!IT)
     {

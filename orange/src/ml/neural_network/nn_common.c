@@ -12,7 +12,7 @@
 
 // Amit - The ML Framework writer
 
-extern __thread uint32_t _orange_error_code;
+extern __thread int _orange_error_code;
 extern __thread char _orange_error_string[1024];
 extern __thread char _orange_debug_string[1024];
 

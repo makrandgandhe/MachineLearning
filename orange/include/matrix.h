@@ -12,6 +12,7 @@
 #include<matrix/mat_double_matrix.h>
 #include<matrix/mat_double_math.h>
 #include<matrix/mat_string_matrix.h>
+#include<makutils.h>
 
 #define MAT_FALSE 0
 #define MAT_TRUE 1

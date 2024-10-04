@@ -1,11 +1,9 @@
 #ifndef ____ORANGE_ERROR_H
 #define ____ORANGE_ERROR_H 1
 
-// ToDo - Proper placement of these things
-
-extern __thread uint32_t _orange_error_code;
-extern __thread char _orange_error_string[1024];
-extern __thread char _orange_debug_string[1024];
+__thread int _orange_error_code;
+__thread char _orange_error_string[1024];
+__thread char _orange_debug_string[1024];
 
 #define _orange_set_error(error_code,error_string,...) \
     _orange_error_code = error_code; \
@@ -13,7 +11,7 @@ extern __thread char _orange_debug_string[1024];
     snprintf(_orange_debug_string,1023,"File %s\nFunction: %s\nLine: %d\n", __FILE__ , __FUNCTION__ , __LINE__);
 
 void orange_reset_error(void);
-int orange_error();
+int orange_error(void);
 
 enum _ORANGE_ERROR_CODES {
     ORANGE_NO_ERROR = 0,
@@ -35,6 +33,20 @@ enum _ORANGE_ERROR_CODES {
 #define ORANGE_FEATURE_MATRIX_ROW_COUNT_NOT_EQUAL_TO_TARGET_ROWS_COUNT "Incompatible Feature Matrix and Target, Length mismatch - %s(%u) and %s(%u)"
 #define ORANGE_INVALID_LEARNING_RATE "Invalid learning rate passed/set - %f"
 #define ORANGE_INVALID_NUMBER_OF_ITERATIONS "Invalid number of iterations passed/set - %lu"
+
+
+void orange_reset_error(void)
+{
+    _orange_error_code = ORANGE_NO_ERROR;
+    _orange_error_string[0] = '\0';
+    _orange_debug_string[0] = '\0';
+}
+
+
+int orange_error(void)
+{
+    return _orange_error_code;
+}
 
 
 #endif
