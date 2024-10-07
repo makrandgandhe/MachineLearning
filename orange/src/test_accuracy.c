@@ -71,7 +71,7 @@ mat_double* test_accuracy(dataset* data_set, vec_double* trained_parameters)
         printf("Unable to create A vector from dataset\n");
         return NULL;
     }
-    P = vec_double_matrix_vector_multiplication(I, trained_parameters);
+    P = vec_double_matrix_vector_multiplication(I, trained_parameters, NULL);
     if(!P)
     {
         mat_double_destroy(I);
@@ -80,7 +80,7 @@ mat_double* test_accuracy(dataset* data_set, vec_double* trained_parameters)
         return NULL;
     }
     vec_double_to_csv(P, "predicted.csv");
-    E = vec_double_vector_substraction(P, A);
+    E = vec_double_vector_substraction(P, A, NULL);
     if(!E)
     {
         mat_double_destroy(I);

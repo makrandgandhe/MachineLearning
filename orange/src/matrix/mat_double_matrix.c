@@ -289,13 +289,27 @@ mat_double* mat_double_matrix_multiplication(mat_double* left_matrix, mat_double
 //     return result_matrix;
 // }
 
-mat_double *mat_double_scalar_multiplication(double scalar_value, mat_double *matrix)
+mat_double* mat_double_scalar_multiplication(double scalar_value, mat_double* matrix, mat_double* target_container)
 {
     mat_double *result_matrix;
     index_t r, c;
+    dimension_t tr, tc;
     if (!matrix)
         return NULL;
-    result_matrix = mat_double_create_new(matrix->number_of_rows, matrix->number_of_columns);
+    if(target_container)
+    {
+        mat_double_get_dimensions(target_container, &tr, &tc);
+        if(tr != matrix->number_of_rows || tc != matrix->number_of_columns)
+        {
+            return NULL; // Invalid dimensions of target container
+        }
+        result_matrix = target_container;
+    }
+    else
+    {
+        result_matrix = mat_double_create_new(matrix->number_of_rows, matrix->number_of_columns);
+    }
+
     if (!result_matrix)
         return NULL;
     for (r = 0; r < matrix->number_of_rows; ++r)
@@ -308,13 +322,26 @@ mat_double *mat_double_scalar_multiplication(double scalar_value, mat_double *ma
     return result_matrix;
 }
 
-mat_double *mat_double_matrix_addition(mat_double *left_matrix, mat_double *right_matrix)
+mat_double* mat_double_matrix_addition(mat_double* left_matrix, mat_double* right_matrix, mat_double* target_container)
 {
     mat_double *result_matrix;
     index_t r, c;
+    dimension_t tr, tc;
     if (!left_matrix || !right_matrix || left_matrix->number_of_rows != right_matrix->number_of_rows || left_matrix->number_of_columns != right_matrix->number_of_columns)
         return NULL;
-    result_matrix = mat_double_create_new(left_matrix->number_of_rows, left_matrix->number_of_columns);
+    if(target_container)
+    {
+        mat_double_get_dimensions(target_container, &tr, &tc);
+        if(tr != left_matrix->number_of_rows || tc != left_matrix->number_of_columns)
+        {
+            return NULL; // Invalid dimensions of target container
+        }
+        result_matrix = target_container;
+    }
+    else
+    {
+        result_matrix = mat_double_create_new(left_matrix->number_of_rows, left_matrix->number_of_columns);
+    }
     if (!result_matrix)
         return NULL;
     for (r = 0; r < left_matrix->number_of_rows; ++r)
@@ -327,13 +354,26 @@ mat_double *mat_double_matrix_addition(mat_double *left_matrix, mat_double *righ
     return result_matrix;
 }
 
-mat_double *mat_double_matrix_substraction(mat_double *left_matrix, mat_double *right_matrix)
+mat_double *mat_double_matrix_substraction(mat_double *left_matrix, mat_double *right_matrix, mat_double* target_container)
 {
     mat_double *result_matrix;
     index_t r, c;
+    dimension_t tr, tc;
     if (!left_matrix || !right_matrix || left_matrix->number_of_rows != right_matrix->number_of_rows || left_matrix->number_of_columns != right_matrix->number_of_columns)
         return NULL;
-    result_matrix = mat_double_create_new(left_matrix->number_of_rows, left_matrix->number_of_columns);
+    if(target_container)
+    {
+        mat_double_get_dimensions(target_container, &tr, &tc);
+        if(tr != left_matrix->number_of_rows || tc != left_matrix->number_of_columns)
+        {
+            return NULL; // Invalid dimensions of target container
+        }
+        result_matrix = target_container;
+    }
+    else
+    {
+        result_matrix = mat_double_create_new(left_matrix->number_of_rows, left_matrix->number_of_columns);
+    }
     if (!result_matrix)
         return NULL;
     for (r = 0; r < left_matrix->number_of_rows; ++r)
@@ -651,22 +691,35 @@ void vec_double_get_vector_type(vec_double *vector, char *vector_type)
         *vector_type = vector->vector_type;
 }
 
-vec_double *vec_double_transpose(vec_double *vector)
+vec_double *vec_double_transpose(vec_double *vector, vec_double* target_container)
 {
     vec_double *transposed_vector;
     if (!vector)
         return NULL;
-    if (vector->vector_type == 'c')
-        transposed_vector = vec_double_create_new_row(vector->length);
+    if(target_container)
+    {
+        if(target_container->length != vector->length)
+        {
+            return NULL; // Invalid target container dimensions
+        }
+        transposed_vector = target_container;
+        if(vector->vector_type == 'c') target_container->vector_type = 'c';
+        else target_container->vector_type = 'c';
+    }
     else
-        transposed_vector = vec_double_create_new_column(vector->length);
+    {
+        if (vector->vector_type == 'c')
+            transposed_vector = vec_double_create_new_row(vector->length);
+        else
+            transposed_vector = vec_double_create_new_column(vector->length);
+    }
     if (!transposed_vector)
         return NULL;
     copy_vector(transposed_vector->data, vector->data, sizeof(double), vector->length);
     return transposed_vector;
 }
 
-mat_double *vec_double_vector_multiplication(vec_double *left_vector, vec_double *right_vector)
+mat_double *vec_double_vector_multiplication(vec_double *left_vector, vec_double *right_vector, mat_double* target_container)
 {
     mat_double *matrix;
     dimension_t nr, nc;
@@ -684,7 +737,18 @@ mat_double *vec_double_vector_multiplication(vec_double *left_vector, vec_double
 
     nr = left_vector_nr;
     nc = right_vector_nc;
-    matrix = mat_double_create_new(nr, nc);
+    if(target_container)
+    {
+        if(target_container->number_of_rows != nr || target_container->number_of_columns != nc)
+        {
+            return NULL; // Invalid target container dimensions
+        }
+        matrix = target_container;
+    }
+    else
+    {
+        matrix = mat_double_create_new(nr, nc);
+    }
     if (!matrix)
         return NULL;
 
@@ -703,7 +767,7 @@ mat_double *vec_double_vector_multiplication(vec_double *left_vector, vec_double
     return matrix;
 }
 
-vec_double *vec_double_matrix_vector_multiplication(mat_double *matrix, vec_double *vector)
+vec_double *vec_double_matrix_vector_multiplication(mat_double *matrix, vec_double *vector, vec_double* target_container)
 {
     index_t r, c;
     double value;
@@ -712,7 +776,18 @@ vec_double *vec_double_matrix_vector_multiplication(mat_double *matrix, vec_doub
         return NULL;
     if (vector->vector_type != 'c' || matrix->number_of_columns != vector->length)
         return NULL;
-    result_vector = vec_double_create_new_column(matrix->number_of_rows);
+    if(target_container)
+    {
+        if(target_container->length != matrix->number_of_rows)
+        {
+            return NULL; // Invalid target_container dimensions
+        }
+        result_vector = target_container;
+    }
+    else
+    {
+        result_vector = vec_double_create_new_column(matrix->number_of_rows);
+    }
     if (!result_vector)
         return NULL;
     for (r = 0; r < result_vector->length; ++r)
@@ -727,13 +802,24 @@ vec_double *vec_double_matrix_vector_multiplication(mat_double *matrix, vec_doub
     return result_vector;
 }
 
-vec_double *vec_double_scalar_multiplication(double value, vec_double *vector)
+vec_double *vec_double_scalar_multiplication(double value, vec_double *vector, vec_double* target_container)
 {
     vec_double *result_vector;
     index_t e;
     if (!vector)
         return NULL;
-    result_vector = vector->vector_type == 'r' ? vec_double_create_new_row(vector->length) : vec_double_create_new_column(vector->length);
+    if(target_container)
+    {
+        if(target_container->length != vector->length)
+        {
+            return NULL; // Invalid target_container dimensions
+        }
+        result_vector = target_container;
+    }
+    else
+    {
+        result_vector = vector->vector_type == 'r' ? vec_double_create_new_row(vector->length) : vec_double_create_new_column(vector->length);
+    }
     if (!result_vector)
         return NULL;
     for (e = 0; e < vector->length; ++e)
@@ -743,7 +829,7 @@ vec_double *vec_double_scalar_multiplication(double value, vec_double *vector)
     return result_vector;
 }
 
-vec_double *vec_double_vector_addition(vec_double *left_vector, vec_double *right_vector)
+vec_double *vec_double_vector_addition(vec_double *left_vector, vec_double *right_vector, vec_double* target_container)
 {
     vec_double *result_vector;
     index_t e;
@@ -751,7 +837,18 @@ vec_double *vec_double_vector_addition(vec_double *left_vector, vec_double *righ
         return NULL;
     if (left_vector->length != right_vector->length || left_vector->vector_type != right_vector->vector_type)
         return NULL;
-    result_vector = left_vector->vector_type == 'r' ? vec_double_create_new_row(left_vector->length) : vec_double_create_new_column(left_vector->length);
+    if(target_container)
+    {
+        if(target_container->length != left_vector->length)
+        {
+            return NULL; // Invalid target_container dimensions
+        }
+        result_vector = target_container;
+    }
+    else
+    {
+        result_vector = left_vector->vector_type == 'r' ? vec_double_create_new_row(left_vector->length) : vec_double_create_new_column(left_vector->length);
+    }
     if (!result_vector)
         return NULL;
     for (e = 0; e < left_vector->length; ++e)
@@ -761,7 +858,7 @@ vec_double *vec_double_vector_addition(vec_double *left_vector, vec_double *righ
     return result_vector;
 }
 
-vec_double *vec_double_vector_substraction(vec_double *left_vector, vec_double *right_vector)
+vec_double *vec_double_vector_substraction(vec_double *left_vector, vec_double *right_vector, vec_double* target_container)
 {
     vec_double *result_vector;
     index_t e;
@@ -769,7 +866,20 @@ vec_double *vec_double_vector_substraction(vec_double *left_vector, vec_double *
         return NULL;
     if (left_vector->length != right_vector->length || left_vector->vector_type != right_vector->vector_type)
         return NULL;
-    result_vector = left_vector->vector_type == 'r' ? vec_double_create_new_row(left_vector->length) : vec_double_create_new_column(left_vector->length);
+
+    if(target_container)
+    {
+        if(target_container->length != left_vector->length)
+        {
+            return NULL; // Invalid target_container dimensions
+        }
+        result_vector = target_container;
+    }
+    else
+    {
+        result_vector = left_vector->vector_type == 'r' ? vec_double_create_new_row(left_vector->length) : vec_double_create_new_column(left_vector->length);
+    }
+
     if (!result_vector)
         return NULL;
     for (e = 0; e < left_vector->length; ++e)
@@ -878,6 +988,36 @@ vec_double *mat_double_column_to_vector(mat_double *matrix, index_t column_index
     return vector;
 }
 
+vec_double* mat_double_row_to_vector(mat_double* matrix, index_t row_index, vec_double* target_container)
+{
+    index_t c;
+    vec_double* vector;
+    double* row;
+    if (!matrix || row_index >= matrix->number_of_rows)
+        return NULL;
+    if(target_container)
+    {
+        if(target_container->length != matrix->number_of_columns)
+        {
+            printf("Comparision failed %d != %d",target_container->length, matrix->number_of_columns);
+            return NULL; // Invalid target container dimensions
+        }
+        vector = target_container;
+        vector->vector_type = 'r';
+    }
+    else
+    {
+        vector = vec_double_create_new_row(matrix->number_of_columns);
+    }
+    if(!vector) return NULL; // Insufficient memory
+    row = matrix->data[row_index];
+    for(c=0;c<matrix->number_of_columns;++c)
+    {
+        vector->data[c] = row[c];
+    }
+    return vector;
+}
+
 int mat_double_box_copy(mat_double *source_matrix, index_t source_row_start, index_t source_column_start, dimension_t number_of_rows, dimension_t number_of_columns, mat_double *destination_matrix, index_t destination_row_start, index_t destination_column_start)
 {
     index_t rs, cs, rd, cd;
@@ -933,6 +1073,56 @@ int mat_double_copy_vector_to_column(mat_double *matrix, vec_double *vector, ind
     }
     return 0;
 }
+
+
+void vec_double_copy(vec_double* src, vec_double* dest, index_t src_start_index, index_t dest_start_index, dimension_t number_of_elements)
+{
+    if(!src || !dest)
+    {
+        return;
+    }
+    if(src_start_index + number_of_elements > src->length ||  dest_start_index + number_of_elements > dest->length)
+    {
+        return;
+    }
+    copy_vector(dest->data + dest_start_index, src->data + src_start_index, sizeof(double), number_of_elements);
+}
+
+
+index_t vec_double_exists(vec_double* vector, double value)
+{
+    index_t i;
+    if(!vector)
+    {
+        return NULL;
+    }
+    for(i=0;i<vector->length;++i)
+    {
+        if(orange_double_equals(vector->data[i], value))
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+
+mat_double* vec_double_one_hot_encode(vec_double* vector)
+{
+    mat_double* matrix;
+    index_t i, index;
+    dimension_t r, c, k;
+    if(!vector)
+    {
+        return NULL;
+    }
+    k = 0;
+    for(i=0;i<vector->length;++i)
+    {
+        if()
+    }
+}
+
 
 // this function will be moved to some other location
 int random_number_in_range(int start, int end)

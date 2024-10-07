@@ -73,7 +73,7 @@ int linear_regression(dataset* data_set, double learning_rate, long unsigned int
 
     while(1)
     {
-        P = vec_double_matrix_vector_multiplication(I, M);
+        P = vec_double_matrix_vector_multiplication(I, M, NULL);
         if(PRINT_MODE == DEBUG) vec_double_print(P,"P");
         if(!P)
         {
@@ -85,7 +85,7 @@ int linear_regression(dataset* data_set, double learning_rate, long unsigned int
             printf("Unable to perform vec_double_matrix_vector_multiplication(I, M)\n");
             return 0;
         }
-        E = vec_double_vector_substraction(P, A);
+        E = vec_double_vector_substraction(P, A, NULL);
         if(PRINT_MODE == DEBUG) vec_double_print(E,"E");
         if(!E)
         {
@@ -98,7 +98,7 @@ int linear_regression(dataset* data_set, double learning_rate, long unsigned int
             printf("Unable to perform vec_double_vector_substraction(P, A)\n");
             return 0;
         }
-        ET = vec_double_transpose(E);
+        ET = vec_double_transpose(E, NULL);
         if(PRINT_MODE == DEBUG) vec_double_print(ET,"ET");
         if(!ET)
         {
@@ -112,7 +112,7 @@ int linear_regression(dataset* data_set, double learning_rate, long unsigned int
             printf("Unable to perform vec_double_transpose(E)\n");
             return 0;
         }
-        EE = vec_double_vector_multiplication(ET, E);
+        EE = vec_double_vector_multiplication(ET, E, NULL);
         if(PRINT_MODE == DEBUG) mat_double_print(EE,"EE");
         if(!EE)
         {
@@ -145,7 +145,7 @@ int linear_regression(dataset* data_set, double learning_rate, long unsigned int
         }
         
 
-        IT_E = vec_double_matrix_vector_multiplication(IT, E);
+        IT_E = vec_double_matrix_vector_multiplication(IT, E, NULL);
         if(PRINT_MODE == DEBUG) vec_double_print(IT_E,"IT_E");
         if(!IT_E)
         {
@@ -161,7 +161,7 @@ int linear_regression(dataset* data_set, double learning_rate, long unsigned int
             printf("Unable to perform vec_double_matrix_vector_multiplication(IT, E)\n");
             return 0;
         }
-        LR_N__IT_E = vec_double_scalar_multiplication(LR_N, IT_E);
+        LR_N__IT_E = vec_double_scalar_multiplication(LR_N, IT_E, NULL);
         if(PRINT_MODE == DEBUG) vec_double_print(LR_N__IT_E,"LR_N__IT_E");
         if(!LR_N__IT_E)
         {
@@ -179,7 +179,7 @@ int linear_regression(dataset* data_set, double learning_rate, long unsigned int
             return 0;
         }
         if(PRINT_MODE == DEBUG) vec_double_print(M,"M");
-        UM = vec_double_vector_substraction(M, LR_N__IT_E);
+        UM = vec_double_vector_substraction(M, LR_N__IT_E, NULL);
         if(!UM)
         {
             mat_double_destroy(data_set);

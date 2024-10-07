@@ -46,13 +46,13 @@ void mat_double_test1()
     mat_double_print(matrix3, "Matrix1 x Transpose of Matrix1");
     printf("\n\ntesting  mat_double_scalar_multiplication\n");
     val = 5;
-    matrix4 = mat_double_scalar_multiplication(val, matrix1);
+    matrix4 = mat_double_scalar_multiplication(val, matrix1, NULL);
     mat_double_print(matrix4, "Matrix4 = 5 x Matrix1");
     printf("\n\ntesting  mat_double_matrix_addition\n");
-    matrix5 = mat_double_matrix_addition(matrix1, matrix4);
+    matrix5 = mat_double_matrix_addition(matrix1, matrix4, NULL);
     mat_double_print(matrix5, "Matrix5 = Matrix1 + Matrix4");
     printf("\n\ntesting  mat_double_matrix_substraction\n");
-    matrix6 = mat_double_matrix_substraction(matrix5, matrix4);
+    matrix6 = mat_double_matrix_substraction(matrix5, matrix4, NULL);
     mat_double_print(matrix6, "Matrix6 = Matrix5 - Matrix4");
     printf("\n\ntesting  mat_double_to_csv\n");
     mat_double_to_csv(matrix5, "matrix5.csv");
@@ -66,7 +66,7 @@ void mat_double_test1()
 
     // vector tests
 
-    vec_double *vector1, *vector2, *vector3, *vector4, *vector5, *vector6, *vector7, *vector8, *vector9, *vector10, *vector11, *vector12;
+    vec_double *vector1, *vector2, *vector3, *vector4, *vector5, *vector6, *vector7, *vector8, *vector9, *vector10, *vector11, *vector12, *vector13, *vector14, *vector15;
 
     printf("\n\ntesting  vec_double_create_new_row\n");
     vector1 = vec_double_create_new_row_filled(3, 2);
@@ -90,7 +90,7 @@ void mat_double_test1()
     vec_double_get_vector_type(vector1, &vt);
     printf("type of vector1 = %c\n", vt);
     printf("\n\ntesting  vec_double_transpose\n");
-    vector3 = vec_double_transpose(vector1);
+    vector3 = vec_double_transpose(vector1, NULL);
     vec_double_print(vector3, "Vector3 = Transpose of Vector1");
     printf("\n\ntesting  vec_double_vector_multiplication\n");
     vector12 = vec_double_create_new_row(4);
@@ -102,10 +102,10 @@ void mat_double_test1()
     vec_double_set(vector12, 3, 8);
     vec_double_print(vector2, "Vector2");
     vec_double_print(vector12, "Vector12");
-    matrix8 = vec_double_vector_multiplication(vector2, vector12);
+    matrix8 = vec_double_vector_multiplication(vector2, vector12, NULL);
     mat_double_print(matrix8, "Matrix8 = Vector2 * Vector12");
     printf("\n\ntesting  vec_double_matrix_vector_multiplication\n");
-    vector4 = vec_double_matrix_vector_multiplication(matrix1, vector2);
+    vector4 = vec_double_matrix_vector_multiplication(matrix1, vector2, NULL);
     mat_double_print(matrix1, "Matrix1");
     vec_double_print(vector2, "Vector2");
     vec_double_print(vector4, "Vector4 = Metrix1 * Vector2");
@@ -125,18 +125,18 @@ void mat_double_test1()
 
     mat_double_print(matrix9, "Matrix9");
     vec_double_print(vector10, "Vector10");
-    vector11 = vec_double_matrix_vector_multiplication(matrix9, vector10);
+    vector11 = vec_double_matrix_vector_multiplication(matrix9, vector10, NULL);
 
     vec_double_print(vector11, "Vector11 = Matrix9 * Vector10");
 
     printf("\n\ntesting  vec_double_scalar_multiplication\n");
-    vector5 = vec_double_scalar_multiplication(3, vector4);
+    vector5 = vec_double_scalar_multiplication(3, vector4, NULL);
     vec_double_print(vector5, "Vector5 = 3 * Vector4");
     printf("\n\ntesting  vec_double_vector_addition\n");
-    vector6 = vec_double_vector_addition(vector4, vector5);
+    vector6 = vec_double_vector_addition(vector4, vector5, NULL);
     vec_double_print(vector6, "Vector6 = Vector4 + Vector5");
     printf("\n\ntesting  vec_double_vector_substraction\n");
-    vector7 = vec_double_vector_substraction(vector6, vector5);
+    vector7 = vec_double_vector_substraction(vector6, vector5, NULL);
     vec_double_print(vector7, "Vector7 = Vector6 - Vector5");
     printf("\n\ntesting vec_double_to_csv\n");
     vec_double_to_csv(vector7, "Vector7.csv");
@@ -153,8 +153,16 @@ void mat_double_test1()
     vector9 = mat_double_column_to_vector(matrix4, 2);
     vec_double_print(vector9, "Vector9 = 3'rd column in Matrix4");
 
+    printf("\n\nmat_double_row_to_vector\n");
+    vector13 = vec_double_create_new_row(3);
+    vector14 = mat_double_row_to_vector(matrix4, 1, vector13);
+    vec_double_print(vector14, "Vector14 = Matrix4[1]");
 
-
+    printf("\n\nvec_double_copy\n");
+    vector15 = vec_double_create_new_row(4);
+    vec_double_set(vector15, 0, 1.0);
+    vec_double_copy(vector14, vector15, 0, 1, 3);
+    vec_double_print(vector15, "vec_double_copy(vector14, vector15, 0, 1, 3)");
 }
 
 int main()

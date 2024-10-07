@@ -18,6 +18,8 @@ enum _ORANGE_ERROR_CODES {
     ORANGE_LOW_MEMORY_CODE = 1001,
     ORANGE_INVALID_NUMBER_OF_INPUT_FEATURES_CODE = 301,
     ORANGE_INVALID_NUMBER_OF_UNITS_CODE = 302,
+    ORANGE_ACTIVATION_FUNCTION_RETURNED_NULL_CODE = 391;
+    ORANGE_ACTIVATION_FUNCTION_RETURNED_INVALID_VECTOR_CODE = 392,
     ORANGE_FEATURE_MATRIX_ROW_COUNT_NOT_EQUAL_TO_TARGET_ROWS_COUNT_CODE = 303,
     ORANGE_INVALID_LEARNING_RATE_CODE = 304,
     ORANGE_INVALID_NUMBER_OF_ITERATIONS_CODE = 305,
@@ -33,7 +35,8 @@ enum _ORANGE_ERROR_CODES {
 #define ORANGE_FEATURE_MATRIX_ROW_COUNT_NOT_EQUAL_TO_TARGET_ROWS_COUNT "Incompatible Feature Matrix and Target, Length mismatch - %s(%u) and %s(%u)"
 #define ORANGE_INVALID_LEARNING_RATE "Invalid learning rate passed/set - %f"
 #define ORANGE_INVALID_NUMBER_OF_ITERATIONS "Invalid number of iterations passed/set - %lu"
-
+#define ORANGE_ACTIVATION_FUNCTION_RETURNED_NULL "Activation function associated with layer[%u] returned NULL. Note: Layer index start from 0, for eg. layer 0 is the input layer."
+#define ORANGE_ACTIVATION_FUNCTION_RETURNED_INVALID_VECTOR "Activation function associated with layer[%u] returned invalid vector. Note: Layer index start from 0, for eg. layer 0 is the input layer."
 
 void orange_reset_error(void)
 {

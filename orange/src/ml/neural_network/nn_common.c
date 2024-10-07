@@ -25,7 +25,7 @@ typedef struct __orange_neural_network_model {
 } orange_neural_network_model;
 
 
-typedef vec_double* (*orange_neural_network_activation_function_t) (vec_double*);
+typedef vec_double* (*orange_neural_network_activation_function_t) (const vec_double*);
 typedef orange_neural_network_activation_function_t orange_neural_network_activation_function_derivative_t;
 
 typedef struct __orange_neural_network {
@@ -360,12 +360,12 @@ void orange_neural_network_add_hidden_layer(orange_neural_network *neural_networ
         free(neural_network->hidden_layer_activation_function_derivatives);
     }
 
-    v_number_of_units_in_each_hidden_layer[neural_network->number_of_hidden_layers] = number_of_units;
+    v_number_of_units_in_each_hidden_layer[neural_network->number_of_hidden_layers] = number_of_units + 1;
     v_hidden_layer_activation_functions[neural_network->number_of_hidden_layers] = activation_function;
     v_hidden_layer_activation_function_derivatives[neural_network->number_of_hidden_layers] = activation_function_derivative;
 
     neural_network->number_of_hidden_layers = v_number_of_hidden_layers;
-    neural_network->number_of_units_in_each_hidden_layer = v_number_of_units_in_each_hidden_layer + 1;
+    neural_network->number_of_units_in_each_hidden_layer = v_number_of_units_in_each_hidden_layer;
     neural_network->hidden_layer_activation_functions = v_hidden_layer_activation_functions;
     neural_network->hidden_layer_activation_function_derivatives = v_hidden_layer_activation_function_derivatives;
 }
@@ -422,6 +422,11 @@ orange_neural_network_model* orange_neural_network_logistic_batch_gd_fit(orange_
     dimension_t number_of_output_units;
     dimension_t number_of_hidden_layers;
     dimension_t* number_of_units_in_each_hidden_layer;
+
+
+    vec_double* training_example;
+    vec_double* tmp_activation_vector = NULL;
+    dimension_t tmp_activation_vector_length;
 
 
 
@@ -492,11 +497,13 @@ orange_neural_network_model* orange_neural_network_logistic_batch_gd_fit(orange_
     }
     activation_vectors[0] = vec_double_create_new(number_of_input_features + 1); // +1 to accommodate bias
     if(orange_error()) goto handle_err; // ToDo - change the definition of vec_double functions to set error
+    vec_double_set(activation_vectors[0], 0, 1); // setting bias
     for(i=0;i<number_of_hidden_layers;++i)
     {
         j = number_of_units_in_each_hidden_layer[i];
         activation_vectors[i+1] =  vec_double_create_new(j);
         if(orange_error()) goto handle_err;
+        vec_double_set(activation_vectors[i+1], 0, 1);
     }
     activation_vectors[i] = vec_double_create_new(number_of_output_units);
     if(orange_error()) goto handle_err;
@@ -562,8 +569,52 @@ orange_neural_network_model* orange_neural_network_logistic_batch_gd_fit(orange_
         for(i=0;i<x_rows;++i)
         {
             // load ith row in 1st layer
-            // forward propagation
-            // backward propagation
+
+            training_example = mat_double_row_to_vector(X, i, product_vectors[0]);
+            if(!training_example) printf("Cant load a training example!!!\n");
+
+            // forward propagation starts
+            for(j = 0;j < number_of_hidden_layers;++j)
+            {
+                vec_double_matrix_vector_multiplication(theta_matrices[j], activation_vectors[j], product_vectors[j]);
+                tmp_activation_vector = neural_network->hidden_layer_activation_functions[j](product_vectors[j]);
+                if(!tmp_activation_vector)
+                {
+                    _orange_set_error(ORANGE_ACTIVATION_FUNCTION_RETURNED_NULL_CODE, ORANGE_ACTIVATION_FUNCTION_RETURNED_NULL, j+1);
+                    goto: handle_err;
+                }
+                vec_double_get_length(tmp_activation_vector,&tmp_activation_vector_length);
+                if(tmp_activation_vector_length != number_of_units_in_each_hidden_layer[j] - 1)
+                {
+                    _orange_set_error(ORANGE_ACTIVATION_FUNCTION_RETURNED_INVALID_VECTOR_CODE, ORANGE_ACTIVATION_FUNCTION_RETURNED_INVALID_VECTOR_CODE, j+1);
+                    goto: handle_err;
+                }
+                vec_double_copy(tmp_activation_vector, activation_vectors[j+1],0,1,tmp_activation_vector_length);
+                vec_double_destroy(tmp_activation_vector);
+            }
+            vec_double_matrix_vector_multiplication(theta_matrices[j], activation_vectors[j], product_vectors[j]);
+            tmp_activation_vector = neural_network->output_layer_activation_function(product_vectors[j]);
+            if(!tmp_activation_vector)
+            {
+                _orange_set_error(ORANGE_ACTIVATION_FUNCTION_RETURNED_NULL_CODE, ORANGE_ACTIVATION_FUNCTION_RETURNED_NULL, j+1);
+                goto: handle_err;
+            }
+            vec_double_get_length(tmp_activation_vector,&tmp_activation_vector_length);
+            if(tmp_activation_vector_length != number_of_units_in_each_hidden_layer[j] - 1)
+            {
+                _orange_set_error(ORANGE_ACTIVATION_FUNCTION_RETURNED_INVALID_VECTOR_CODE, ORANGE_ACTIVATION_FUNCTION_RETURNED_INVALID_VECTOR_CODE, j+1);
+                goto: handle_err;
+            }
+            vec_double_copy(tmp_activation_vector, activation_vectors[j+1],0,1,tmp_activation_vector_length);
+            vec_double_destroy(tmp_activation_vector);
+
+            // forward propagation ends
+
+            // backward propagation starts
+
+
+
+            // backward propagation ends
         }
         // update theta matrices
          if(progress_callback)
