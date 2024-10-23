@@ -402,8 +402,8 @@ void orange_neural_network_set_output_layer(orange_neural_network* neural_networ
 orange_neural_network_model* orange_neural_network_logistic_batch_gd_fit(orange_neural_network* neural_network, mat_double* X, mat_double* Y, orange_gd_options* options, double regularization_parameter)
 {
     uint64_t iteration_number;
-    index_t i, j;
-    dimension_t r, c;
+    index_t i, j, k, p;
+    dimension_t r, c, delta_length;
     orange_neural_network_model* model;
     vec_double** activation_vectors;
     vec_double** product_vectors;
@@ -426,7 +426,9 @@ orange_neural_network_model* orange_neural_network_logistic_batch_gd_fit(orange_
 
     vec_double* training_example;
     vec_double* tmp_activation_vector = NULL;
+    cev_double* current_delta_vector;
     dimension_t tmp_activation_vector_length;
+    double value , value1, value2;
 
 
 
@@ -568,55 +570,86 @@ orange_neural_network_model* orange_neural_network_logistic_batch_gd_fit(orange_
     {
         for(i=0;i<x_rows;++i)
         {
-            // load ith row in 1st layer
+            // load ith row in 1st layer starts
 
             training_example = mat_double_row_to_vector(X, i, product_vectors[0]);
-            if(!training_example) printf("Cant load a training example!!!\n");
-
+            if(!training_example) 
+            {
+            	printf("Unable to load training example, at training example number.\n");
+            	goto handle_err;
+            }
+            printf("Cant load a training example!!!\n");
+            
+            // load ith row in 1st layer starts
+            
             // forward propagation starts
-            for(j = 0;j < number_of_hidden_layers;++j)
+            for(j = 0;j < number_of_hidden_layers + 1;++j)
             {
                 vec_double_matrix_vector_multiplication(theta_matrices[j], activation_vectors[j], product_vectors[j]);
-                tmp_activation_vector = neural_network->hidden_layer_activation_functions[j](product_vectors[j]);
+                if(orange_error())
+                {
+                	goto: handle_err;
+                }
+                if(j != number_of_hidden_layers)
+                {
+                	tmp_activation_vector = neural_network->hidden_layer_activation_functions[j](product_vectors[j]);
+                }
+                else // for output layer
+                {
+                	tmp_activation_vector = neural_network->output_layer_activation_function(product_vectors[j]);
+                }
                 if(!tmp_activation_vector)
                 {
                     _orange_set_error(ORANGE_ACTIVATION_FUNCTION_RETURNED_NULL_CODE, ORANGE_ACTIVATION_FUNCTION_RETURNED_NULL, j+1);
                     goto: handle_err;
                 }
                 vec_double_get_length(tmp_activation_vector,&tmp_activation_vector_length);
-                if(tmp_activation_vector_length != number_of_units_in_each_hidden_layer[j] - 1)
+                if(j != number_of_hidden_layers)
                 {
-                    _orange_set_error(ORANGE_ACTIVATION_FUNCTION_RETURNED_INVALID_VECTOR_CODE, ORANGE_ACTIVATION_FUNCTION_RETURNED_INVALID_VECTOR_CODE, j+1);
-                    goto: handle_err;
+	                if(tmp_activation_vector_length != number_of_units_in_each_hidden_layer[j] - 1)
+    	            {
+    	                _orange_set_error(ORANGE_ACTIVATION_FUNCTION_RETURNED_INVALID_VECTOR_CODE, ORANGE_ACTIVATION_FUNCTION_RETURNED_INVALID_VECTOR_CODE, j+1);
+    	                goto: handle_err;
+    	            }
+   	            	vec_double_copy(tmp_activation_vector, activation_vectors[j+1],0,1,tmp_activation_vector_length);
                 }
-                vec_double_copy(tmp_activation_vector, activation_vectors[j+1],0,1,tmp_activation_vector_length);
+                else // for output layer
+                {
+    	            if(tmp_activation_vector_length != number_of_units_in_each_hidden_layer[j])
+    	            {
+    	                _orange_set_error(ORANGE_ACTIVATION_FUNCTION_RETURNED_INVALID_VECTOR_CODE, ORANGE_ACTIVATION_FUNCTION_RETURNED_INVALID_VECTOR_CODE, j+1);
+    	                goto: handle_err;
+    	            }
+	                vec_double_copy(tmp_activation_vector, activation_vectors[j+1],0,0,tmp_activation_vector_length);
+                }
                 vec_double_destroy(tmp_activation_vector);
+                tmp_activation_vector = NULL; // To be alse mentions in handle error
             }
-            vec_double_matrix_vector_multiplication(theta_matrices[j], activation_vectors[j], product_vectors[j]);
-            tmp_activation_vector = neural_network->output_layer_activation_function(product_vectors[j]);
-            if(!tmp_activation_vector)
-            {
-                _orange_set_error(ORANGE_ACTIVATION_FUNCTION_RETURNED_NULL_CODE, ORANGE_ACTIVATION_FUNCTION_RETURNED_NULL, j+1);
-                goto: handle_err;
-            }
-            vec_double_get_length(tmp_activation_vector,&tmp_activation_vector_length);
-            if(tmp_activation_vector_length != number_of_units_in_each_hidden_layer[j] - 1)
-            {
-                _orange_set_error(ORANGE_ACTIVATION_FUNCTION_RETURNED_INVALID_VECTOR_CODE, ORANGE_ACTIVATION_FUNCTION_RETURNED_INVALID_VECTOR_CODE, j+1);
-                goto: handle_err;
-            }
-            vec_double_copy(tmp_activation_vector, activation_vectors[j+1],0,1,tmp_activation_vector_length);
-            vec_double_destroy(tmp_activation_vector);
-
+            
             // forward propagation ends
 
             // backward propagation starts
 
-
-
+			// calculate last delta
+			delta_length = vec_double_get_length(activation_vectors[number_of_hidden_layers + 1]);
+			current_delta_vector = delta_vectors[number_of_hidden_layers];
+			for(k = 0;k < delta_length; ++k)
+			{
+				value1 = vec_double_get(activation_vectors[number_of_hidden_layers + 1], k);
+				value2 = mat_double_get(Y, i, k);
+				vec_double_set(current_delta_vector, k, value1 - value2);
+			}
+			for(j = 0;j< number_of_hidden_layers; ++j)
+			{
+				current_delta_vector = delta_vectors[number_of_hidden_layes - j - 1];
+				
+			}
             // backward propagation ends
+            
+            vec_double_destroy(training_example);
         }
-        // update theta matrices
+        // update theta matrices starts
+        // update theta matrices ends
          if(progress_callback)
          {
             // progress_callback();
